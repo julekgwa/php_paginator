@@ -22,7 +22,7 @@ Here I'm using [Foundation 5](http://foundation.zurb.com/)
 ```
   <script src="js/vendor/modernizr.js"></script>`
   ```
-  ###Creating the pagination file.
+  ##Creating the pagination file.
   ```php
   <?php
 
