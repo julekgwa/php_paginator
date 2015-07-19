@@ -45,7 +45,7 @@
 
 		$prev_pages_list = prev_pages($page_number,$num_prev_pages);
 		$next_page_list = next_pages($page_number, $num_next_pages);
-		$list_items = $prev_pages_list . '<li><a href="">' . $page_number . '</a> </li>' . $next_page_list;
+		$list_items = $prev_pages_list . '<li class="current"><a href="">' . $page_number . '</a> </li>' . $next_page_list;
 		echo $list_items;
 	}
 
