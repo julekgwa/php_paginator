@@ -75,10 +75,12 @@ for ($counter = 1; $counter <= $last_page; $counter++) {
    		<!-- our paginatio  using foundation 5-->
    		 <hr>
              <ul class="pagination" role="menubar" arial-label="Pagination">
-                 <li class="arrow" arial-disabled="true"><a href="<?php echo ($page_number - 1).'.php'; ?>">&laquo; Previous</a></li>
+                 <!-- hide previous if current page is index.php or some other page provided in the if statement, by applying the hide class to the li -->
+                 <li class="arrow <?php echo ($current_page == 'index.php' ? 'hide' : ''); ?>" arial-disabled="true"><a href="<?php echo ($page_number - 1).'.php'; ?>">&laquo; Previous</a></li>
                  <!-- pagination goes here -->
                  <?php pagination($page_number, 4, 4); ?>
-                 <li class="arrow" arial-disabled="true"><a href="<?php echo ($page_number + 1).'.php'; ?>">Next &raquo; </a></li>
+                 <!-- hide next if we have reached the last page, by applying the hide class to the li -->
+                 <li class="arrow <?php echo ($last_page == $page_number ? 'hide' : ''); ?>" arial-disabled="true"><a href="<?php echo ($page_number + 1).'.php'; ?>">Next &raquo; </a></li>
              </ul>
    </div>
    ```
