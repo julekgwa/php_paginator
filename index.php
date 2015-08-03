@@ -7,7 +7,7 @@ $options = array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION);
 $Db = new Db('mysql:host=localhost;dbname=data','root','',$options);
 
 // get row count
-$row_count = $Db->rowCounts('torrents'); // "testing" is the name of the table
+$row_count = $Db->rowCounts('testing'); // "testing" is the name of the table
 
 // how many records should be displayed on a page?
 $num_rows = 12;
@@ -24,14 +24,14 @@ if($current_page !== 'index.php'){
     $start = ($limit * $page_number);
 }
 // get rows left in the database
-$rows_left = $Db->rowsLeft('torrents', $start, $limit);
+$rows_left = $Db->rowsLeft('testing', $start, $limit);
 
 if($rows_left < $num_rows){
     $limit = $num_rows;
 }
 
 // selecting data from the database
-$select = $Db->selecetLimit('torrents', '*', $start, $limit);
+$select = $Db->selecetLimit('testing', '*', $start, $limit);
 
 // from the data we have, we can now create pages by looping through the $last_page.
 // we are going to create pages until the we reach the last page, by copying index.php or some other page.
