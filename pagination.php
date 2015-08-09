@@ -16,7 +16,7 @@
       // adding items to the list only if they are positive numbers.
       if($page_number >= 1){
                             $page = $page_number.'.php'; // get the page before adding it to the list
-                            $page_exits = (file_exists("$page") ? 'class=""' : 'class="hide"' ); //check if page exits, and assign a class to the list item.
+                            $page_exits = (file_exists("$page") ? '' : 'class="hide"' ); //check if page exits, and assign a class to the list item.
         $list_items = '<li '.$page_exits.' >a href="' . $page_number . '.php">' . $page_number . '</a></li>' . $list_items; 
       }
       $num_prev_pages -= 1;
@@ -34,7 +34,7 @@
     while ($count <= $num_next_pages) {
       $page_number += 1;
                         $page = $page_number .'.php'; // get the page before adding it to the list
-                        $page_exits = (file_exists("$page") ? 'class=""' : 'class="hide"' ); //check if page exits, and assign a class to the list item.
+                        $page_exits = (file_exists("$page") ? '' : 'class="hide"' ); //check if page exits, and assign a class to the list item.
       $list_items .= '<li '.$page_exits.'><a href="' . $page_number . '.php">' .$page_number . '</a></li>';
       $count += 1;
     }
