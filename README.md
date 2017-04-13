@@ -1,17 +1,17 @@
-##PHP Paginator 
+## PHP Paginator 
 
 PHP paginator is a script that can generate pagination links + next/previous page links. It gives you full control of how you want your pagination to appear and how many pagination links, to appear per page. 
 
-##Features
+## Features
 - Generate pagination links.
 - Create pagination files, by using PHP copy function.
 - Customizable with your own CSS or CSS frameworks.
 - Set how many pagination to appear per page. e.g. pagination($current_page, 4, 4), only 4 pagination will appear on both sides of the current page.
 
-##Requirements
+## Requirements
 PHP 5+
 
-##How to use
+## How to use
 
 You can customize the appearance of the pagination by using your own CSS or other CSS Frameworks.
 Here I'm using [Foundation 5](http://foundation.zurb.com/) 
@@ -22,7 +22,7 @@ Here I'm using [Foundation 5](http://foundation.zurb.com/)
 ```
   <script src="js/vendor/modernizr.js"></script>`
   ```
-##Creating the pagination file.
+## Creating the pagination file.
   ```php
   <?php
 
@@ -69,7 +69,7 @@ for ($counter = 1; $counter <= $last_page; $counter++) {
 }
 ?>
 ```
-##Calling the pagination() function.
+## Calling the pagination() function.
 ```html
 <div class="pagination-centered">
    		<!-- our paginatio  using foundation 5-->
