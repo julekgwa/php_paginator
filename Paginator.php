@@ -9,9 +9,26 @@ class Paginator
 {
     private $_db;
     private $_table = null;
-    private $_currentItemClass = '';
+    private $_currentPageClass = '';
     private $_itemLimitPerPage;
     private $_rowOffset = 0;
+    private $_urlPattern = '/';
+
+    /**
+     * @return string url pattern
+     */
+    public function getUrlPattern()
+    {
+        return $this->_urlPattern;
+    }
+
+    /**
+     * @param string $urlPattern
+     */
+    public function setUrlPattern($urlPattern)
+    {
+        $this->_urlPattern = $urlPattern;
+    }
 
     /**
      * @return int value of itemLimitPerPage
@@ -83,18 +100,18 @@ class Paginator
      * Get the class to be used on the current item/page
      * @return string the current page class
      */
-    public function getCurrentItemClass()
+    public function getCurrentPageClass()
     {
-        return $this->_currentItemClass;
+        return $this->_currentPageClass;
     }
 
     /**
      * Set the class to be used on the current item/page
-     * @param string $currentItemClass set the class to be used for the current page
+     * @param string $currentPageClass set the class to be used for the current page
      */
-    public function setCurrentItemClass($currentItemClass)
+    public function setCurrentPageClass($currentPageClass)
     {
-        $this->_currentItemClass = $currentItemClass;
+        $this->_currentPageClass = $currentPageClass;
     }
 
 
@@ -200,7 +217,7 @@ class Paginator
             if ($pageNumber >= 1) {
                 $page = $pageNumber . '.php';
                 if (file_exists("$page")) {
-                    $listItems = '<li><a href="' . $pageNumber . '.php">' . $pageNumber . '</a></li>' . $listItems;
+                    $listItems = '<li><a href="' . $this->getUrlPattern() . $pageNumber . '.php">' . $pageNumber . '</a></li>' . $listItems;
                 }
             }
             $numPrevPages -= 1;
@@ -222,7 +239,7 @@ class Paginator
             $pageNumber += 1;
             $page = $pageNumber . '.php';
             if (file_exists("$page")) {
-                $listItems .= '<li><a href="' . $pageNumber . '.php">' . $pageNumber . '</a></li>';
+                $listItems .= '<li><a href="' . $this->getUrlPattern() . $pageNumber . '.php">' . $pageNumber . '</a></li>';
             }
             $count += 1;
         }
@@ -244,7 +261,7 @@ class Paginator
         if ($pageNumber == 'index') {
             $listItems = $prevPagesList . $nextPageList;
         } else {
-            $listItems = $prevPagesList . '<li class="' . $this->getCurrentItemClass() . '"><a href="">' . $pageNumber . '</a> </li>' . $nextPageList;
+            $listItems = $prevPagesList . '<li class="' . $this->getCurrentPageClass() . '"><a href="">' . $pageNumber . '</a> </li>' . $nextPageList;
         }
         echo $listItems;
     }
@@ -260,7 +277,7 @@ class Paginator
         if ($pageNumber == 1) {
             $prev = '<li><a href="index.php">&laquo; Previous</a></li>';
         } elseif ($pageNumber > 1) {
-            $prev = '<li><a href="' . ($pageNumber - 1) . '.php' . '">&laquo; Previous</a></li>';
+            $prev = '<li><a href="' . $this->getUrlPattern() . ($pageNumber - 1) . '.php' . '">&laquo; Previous</a></li>';
         }
         return $prev;
     }
@@ -278,7 +295,7 @@ class Paginator
             $page = ($pageNumber + 1) . '.php';
         }
         if (file_exists($page)) {
-            return '<li><a href="' . ($pageNumber + 1) . '.php">Next &raquo; </a></li>';
+            return '<li><a href="' . $this->getUrlPattern() . ($pageNumber + 1) . '.php">Next &raquo; </a></li>';
         }
         return '';
     }
