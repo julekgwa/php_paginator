@@ -153,11 +153,11 @@ class Paginator
             throw new Exception("Table was not set");
         } else {
             if ($table !== null) {
-                $stmt = $this->_db->prepare("SELECT * FROM $table LIMIT $this->getRowOffset(), $this->getLimitItems()");
+                $stmt = $this->_db->prepare("SELECT * FROM $table LIMIT " . $this->getRowOffset() . "," . $this->getItemLimitPerPage());
                 $stmt->execute();
                 return $stmt->rowCount();
             } elseif ($this->_table !== null) {
-                $stmt = $this->_db->prepare("SELECT * FROM $this->_table LIMIT $this->getRowOffset(), $this->getLimitItems()");
+                $stmt = $this->_db->prepare("SELECT * FROM $this->_table LIMIT " . $this->getRowOffset(). "," . $this->getItemLimitPerPage());
                 $stmt->execute();
                 return $stmt->rowCount();
             }
@@ -167,7 +167,7 @@ class Paginator
     /**
      * Get data to be used on the current page
      * @param int $colId column id
-     * @param array $params optional parameters for table, sort and columns
+     * @param array $params optional parameters for ['table' => 'tableName', 'sort' => 'ASC', 'columns' => 'colId, name, etc']
      * @return array columns from database
      * @throws Exception when table is not set or provided
      */
@@ -176,18 +176,18 @@ class Paginator
         if ($this->_table === null && !isset($params['table'])) {
             throw new Exception("Table was not set");
         }
-        $columns = ($params['columns']) ? $params['columns'] : '*';
-        $sort = ($params['sort']) ? $params['sort'] : 'DESC';
-        if ($params['table'] !== null) {
+        $columns = isset($params['columns']) ? $params['columns'] : '*';
+        $sort = isset($params['sort']) ? $params['sort'] : 'DESC';
+        if (isset($params['table'])) {
             $table = $params['table'];
             $rowsLeft = $this->getRowsLeft($table);
             if ($rowsLeft < $this->_itemLimitPerPage) {
                 $this->_itemLimitPerPage = $rowsLeft;
             }
-            $select = "SELECT $columns FROM " . $table['table'] . "ORDER BY $colId $sort LIMIT ?,?";
+            $select = "SELECT $columns FROM " . $table . " ORDER BY $colId $sort LIMIT ?,?";
             $prepare = $this->_db->prepare($select);
-            $prepare->bindParam(1, $this->getRowOffset(), PDO::PARAM_INT);
-            $prepare->bindParam(2, $this->getItemLimitPerPage(), PDO::PARAM_INT);
+            $prepare->bindParam(1, $this->_rowOffset, PDO::PARAM_INT);
+            $prepare->bindParam(2, $this->_itemLimitPerPage, PDO::PARAM_INT);
             $prepare->execute();
             $results = $prepare->fetchAll();
             return $results;
@@ -196,7 +196,7 @@ class Paginator
             if ($rowsLeft < $this->_itemLimitPerPage) {
                 $this->_itemLimitPerPage = $rowsLeft;
             }
-            $prepare = $this->_db->prepare("SELECT * FROM $this->_table ORDER BY $colId $sort LIMIT $this->getRowOffset(), $this->getLimitItems()");
+            $prepare = $this->_db->prepare("SELECT * FROM $this->_table ORDER BY $colId $sort LIMIT " . $this->getRowOffset() . "," . $this->getItemLimitPerPage());
             $prepare->execute();
             $results = $prepare->fetchAll();
             return $results;
