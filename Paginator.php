@@ -62,7 +62,8 @@ class Paginator
     }
 
     /**
-     * @return mixed
+     * Get the name of the table
+     * @return string the name of the table
      */
     public function getTable()
     {
@@ -70,7 +71,8 @@ class Paginator
     }
 
     /**
-     * @param mixed $table
+     * Set the name of the table
+     * @param string $table the name of the table to be used
      */
     public function setTable($table)
     {
@@ -78,7 +80,8 @@ class Paginator
     }
 
     /**
-     * @return string
+     * Get the class to be used on the current item/page
+     * @return string the current page class
      */
     public function getCurrentItemClass()
     {
@@ -86,15 +89,22 @@ class Paginator
     }
 
     /**
-     * @param string $currentItemClass
+     * Set the class to be used on the current item/page
+     * @param string $currentItemClass set the class to be used for the current page
      */
     public function setCurrentItemClass($currentItemClass)
     {
         $this->_currentItemClass = $currentItemClass;
     }
 
-    // get row count
-    public function rowCount($table = null)
+
+    /**
+     * Get the number of rows available
+     * @param null $table optional table name
+     * @return int the number of row count
+     * @throws Exception when table is not set or provided
+     */
+    public function getRowCount($table = null)
     {
         if ($this->_table === null && $table === null) {
             throw new Exception("Table was not set");
@@ -111,6 +121,12 @@ class Paginator
         }
     }
 
+    /**
+     * Get the number of rows left from the database
+     * @param null $table optional table name
+     * @return int number of rows left
+     * @throws Exception when table is not set or provided
+     */
     public function getRowsLeft($table = null)
     {
         if ($this->getCurrentPage() !== 'index.php') {
@@ -131,6 +147,13 @@ class Paginator
         }
     }
 
+    /**
+     * Get data to be used on the current page
+     * @param int $colId column id
+     * @param array $params optional parameters for table, sort and columns
+     * @return array columns from database
+     * @throws Exception when table is not set or provided
+     */
     public function getPageData($colId, $params = [])
     {
         if ($this->_table === null && !isset($params['table'])) {
@@ -163,6 +186,12 @@ class Paginator
         }
     }
 
+    /**
+     * Create pages that will appear before the current page
+     * @param int $pageNumber the current page number
+     * @param int $numPrevPages the number of pages to appear before the current page
+     * @return string list of pagination links
+     */
     function prevPages($pageNumber, $numPrevPages)
     {
         $listItems = ''; // to save all list items.
@@ -179,6 +208,12 @@ class Paginator
         return $listItems;
     }
 
+    /**
+     * Create pages that will appear after the current page
+     * @param $pageNumber the current page number
+     * @param $numNextPages the number of pages to appear after the current page
+     * @return string list of pagination links
+     */
     function nextPages($pageNumber, $numNextPages)
     {
         $listItems = ''; // to save list items.
@@ -194,6 +229,13 @@ class Paginator
         return $listItems;
     }
 
+    /**
+     * Create the pagination links
+     * @param $pageNumber the current page number
+     * @param $numPrevPages the number of pages to appear before the current page
+     * @param $numNextPages  the number of pages to appear after the current page
+     * @param string $paginationCssClasses optional list of css classes to be set to the list item.
+     */
     function pagination($pageNumber, $numPrevPages, $numNextPages, $paginationCssClasses = '')
     {
 
@@ -201,16 +243,21 @@ class Paginator
         $nextPageList = $this->nextPages($pageNumber, $numNextPages) . $this->nextButton($pageNumber) . '</ul>';
         if ($pageNumber == 'index') {
             $listItems = $prevPagesList . $nextPageList;
-        }else {
+        } else {
             $listItems = $prevPagesList . '<li class="' . $this->getCurrentItemClass() . '"><a href="">' . $pageNumber . '</a> </li>' . $nextPageList;
         }
         echo $listItems;
     }
 
+    /**
+     * Create a link for previous button
+     * @param $pageNumber the current page number
+     * @return string the previous link item list
+     */
     function prevButton($pageNumber)
     {
         $prev = '';
-       if ($pageNumber == 1) {
+        if ($pageNumber == 1) {
             $prev = '<li><a href="index.php">&laquo; Previous</a></li>';
         } elseif ($pageNumber > 1) {
             $prev = '<li><a href="' . ($pageNumber - 1) . '.php' . '">&laquo; Previous</a></li>';
@@ -218,6 +265,11 @@ class Paginator
         return $prev;
     }
 
+    /**
+     * Create a link for next button
+     * @param $pageNumber the current page number
+     * @return string the next link item list
+     */
     function nextButton($pageNumber)
     {
         if ($pageNumber == 'index') {
@@ -231,6 +283,10 @@ class Paginator
         return '';
     }
 
+    /**
+     * Get the current page number
+     * @return int the current page number
+     */
     function getPageNumber()
     {
         $currentPage = basename($_SERVER['SCRIPT_FILENAME']);
@@ -238,15 +294,22 @@ class Paginator
         return $pageNumber;
     }
 
+    /**
+     * Get the current page
+     * @return string return the current page
+     */
     function getCurrentPage()
     {
         $currentPage = basename($_SERVER['SCRIPT_FILENAME']);
         return $currentPage;
     }
 
+    /**
+     * create the required pages
+     */
     function createPages()
     {
-        $last_page = ($this->rowCount() / $this->getItemLimitPerPage()) - 1;
+        $last_page = ($this->getRowCount() / $this->getItemLimitPerPage()) - 1;
         if (!is_int($last_page)) {
             $last_page = (int)$last_page + 1;
         }
@@ -258,6 +321,11 @@ class Paginator
         }
     }
 
+    /**
+     * Force column names to a specific case
+     * @param string $case the case attribute to be set
+     * @throws Exception when unknown case was provided
+     */
     public function setColumnCaseAttribute($case)
     {
         switch ($case) {
@@ -275,6 +343,11 @@ class Paginator
         }
     }
 
+    /**
+     * Set error reporting
+     * @param string $error type of error mode to be set
+     * @throws Exception when unknown error mode was provided
+     */
     public function setErrorModeAttribute($error)
     {
         switch ($error) {
@@ -292,6 +365,11 @@ class Paginator
         }
     }
 
+    /**
+     * Conversion of NULL and empty strings
+     * @param string $error type of null attribute to be set
+     * @throws Exception when unknown type is provided
+     */
     public function setOracleNullsAttribute($error)
     {
         switch ($error) {
@@ -309,6 +387,11 @@ class Paginator
         }
     }
 
+    /**
+     * Convert numeric values to strings when fetching
+     * @param boolean $bool set boolean value for stringify fetches
+     * @throws Exception when non boolean value if provided
+     */
     public function setStringifyFetchesAttribute($bool)
     {
         if (is_bool($bool)) {
@@ -318,21 +401,37 @@ class Paginator
         }
     }
 
+    /**
+     * Set user-supplied statement class derived from PDOStatement
+     * @param string $custom the name of the custom class
+     */
     public function setStatementClassAttribute($custom)
     {
         $this->_db->setAttribute(PDO::ATTR_STATEMENT_CLASS, array($custom, array($this->_db)));
     }
 
+    /**
+     * Specifies the timeout duration in seconds
+     * @param int $seconds number of timeout seconds
+     */
     public function setTimeoutAttribute($seconds)
     {
         $this->_db->setAttribute(PDO::ATTR_TIMEOUT, $seconds);
     }
 
+    /**
+     * Whether to autocommit every single statement
+     * @param boolean $bool set db to autcommit
+     */
     public function setAutoCommitAttribute($bool)
     {
         $this->_db->setAttribute(PDO::ATTR_AUTOCOMMIT, $bool);
     }
 
+    /**
+     * Enables or disables emulation of prepared statements
+     * @param boolean $bool
+     */
     public function setEmulatePreparesAttribute($bool)
     {
         $this->_db->setAttribute(PDO::ATTR_EMULATE_PREPARES, $bool);
