@@ -9,13 +9,12 @@ class Paginator
 {
     private $_db;
     private $_table = null;
-    private $_hide = 'style="display: none !important"';
     private $_currentItemClass = '';
     private $_itemLimitPerPage;
     private $_rowOffset = 0;
 
     /**
-     * @return mixed
+     * @return int value of itemLimitPerPage
      */
     public function getItemLimitPerPage()
     {
@@ -23,7 +22,7 @@ class Paginator
     }
 
     /**
-     * @param mixed $limitItems
+     * @param int $limitItems number of items per page
      */
     public function setItemLimitPerPage($limitItems)
     {
@@ -31,7 +30,7 @@ class Paginator
     }
 
     /**
-     * @return mixed
+     * @return int value of rowOffset
      */
     public function getRowOffset()
     {
@@ -39,7 +38,7 @@ class Paginator
     }
 
     /**
-     * @param mixed $rowOffset
+     * @param int $rowOffset number of row offset
      */
     public function setRowOffset($rowOffset)
     {
@@ -49,9 +48,9 @@ class Paginator
 
     /**
      * Paginator constructor.
-     * @param $dsn
-     * @param $username
-     * @param $password
+     * @param string $dsn database host and database name
+     * @param string $username database username
+     * @param string $password user password
      */
     public function __construct($dsn, $username, $password)
     {
@@ -76,22 +75,6 @@ class Paginator
     public function setTable($table)
     {
         $this->_table = $table;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getHide()
-    {
-        return $this->_hide;
-    }
-
-    /**
-     * @param mixed $hide
-     */
-    public function setHide($hide)
-    {
-        $this->_hide = $hide;
     }
 
     /**
