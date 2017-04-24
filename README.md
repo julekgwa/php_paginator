@@ -8,7 +8,7 @@ PHP paginator is a script that can generate pagination links + next/previous pag
   * [Requirements](#requirements)
   * [How to use](#how-to-use)
   * [Creating pagination](#creating-pagination)
-  * [Screenshots](#screenshots)
+  * [Screenshots](#screenshot)
 
 ## Features
 - Generate pagination links.
