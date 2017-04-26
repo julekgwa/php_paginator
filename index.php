@@ -10,7 +10,8 @@ $Paginator->setCurrentPageClass('active');
 $Paginator->setUrlPattern('/php_paginator/');
 $numPrevPage = 4;
 $numNextPage = 4;
-$paginationCssClass = 'pagination';
+//example on how to pass attributes and classes to pagination
+$paginationAttr = ['ul-class' => 'pagination', 'ul-attr' => 'id="hi" data-pre="pre"', 'li-class' => 'someclass', 'li-attr' => 'data-id="30"'];
 
 ?>
 <!DOCTYPE html>
@@ -36,7 +37,7 @@ $paginationCssClass = 'pagination';
                 <!-- our pagination  using Bootstrap-->
                 <hr>
                 <?php
-                    $Paginator->pagination($Paginator->getPageNumber(), $numPrevPage, $numNextPage, $paginationCssClass);
+                    $Paginator->pagination($Paginator->getPageNumber(), $numPrevPage, $numNextPage, $paginationAttr);
                 ?>
 
             </div>

@@ -207,9 +207,11 @@ class Paginator
      * Create pages that will appear before the current page
      * @param int $pageNumber the current page number
      * @param int $numPrevPages the number of pages to appear before the current page
+     * @param $cssClass class set to the li list
+     * @param $attr attribtes for li list
      * @return string list of pagination links
      */
-    function prevPages($pageNumber, $numPrevPages)
+    function prevPages($pageNumber, $numPrevPages, $cssClass, $attr)
     {
         $listItems = ''; // to save all list items.
         while ($numPrevPages >= 1) {
@@ -217,7 +219,7 @@ class Paginator
             if ($pageNumber >= 1) {
                 $page = $pageNumber . '.php';
                 if (file_exists("$page")) {
-                    $listItems = '<li><a href="' . $this->getUrlPattern() . $pageNumber . '.php">' . $pageNumber . '</a></li>' . $listItems;
+                    $listItems = '<li class="' . $cssClass . '" ' . $attr . '><a href="' . $this->getUrlPattern() . $pageNumber . '.php">' . $pageNumber . '</a></li>' . $listItems;
                 }
             }
             $numPrevPages -= 1;
@@ -229,9 +231,11 @@ class Paginator
      * Create pages that will appear after the current page
      * @param $pageNumber the current page number
      * @param $numNextPages the number of pages to appear after the current page
+     * @param $cssClass class set to the li list
+     * @param $attr attribtes for li list
      * @return string list of pagination links
      */
-    function nextPages($pageNumber, $numNextPages)
+    function nextPages($pageNumber, $numNextPages, $cssClass, $attr)
     {
         $listItems = ''; // to save list items.
         $count = 1;
@@ -239,7 +243,7 @@ class Paginator
             $pageNumber += 1;
             $page = $pageNumber . '.php';
             if (file_exists("$page")) {
-                $listItems .= '<li><a href="' . $this->getUrlPattern() . $pageNumber . '.php">' . $pageNumber . '</a></li>';
+                $listItems .= '<li class="' . $cssClass . '" ' . $attr . '><a href="' . $this->getUrlPattern() . $pageNumber . '.php">' . $pageNumber . '</a></li>';
             }
             $count += 1;
         }
@@ -251,13 +255,17 @@ class Paginator
      * @param $pageNumber the current page number
      * @param $numPrevPages the number of pages to appear before the current page
      * @param $numNextPages  the number of pages to appear after the current page
-     * @param string $paginationCssClasses optional list of css classes to be set to the list item.
+     * @param array $attributes optional list of list attributes.
+     * ['ul-class': => 'space separated list of classes', 'ul-attr': 'id="someId" data-pre="pre"', 'li-class': 'space separated list of classes', 'li-attr': 'id="someid"']
      */
-    function pagination($pageNumber, $numPrevPages, $numNextPages, $paginationCssClasses = '')
+    function pagination($pageNumber, $numPrevPages, $numNextPages, $attributes = [])
     {
-
-        $prevPagesList = '<ul class="' . $paginationCssClasses . '"">' . $this->prevButton($pageNumber) . $this->prevPages($pageNumber, $numPrevPages);
-        $nextPageList = $this->nextPages($pageNumber, $numNextPages) . $this->nextButton($pageNumber) . '</ul>';
+        $ulCssClass = isset($attributes['ul-class']) ? $attributes['ul-class'] : '';
+        $ulAttr = isset($attributes['ul-attr']) ? $attributes['ul-attr'] : '';
+        $liCssClass = isset($attributes['li-class']) ? $attributes['li-class'] : '';
+        $liAttr = isset($attributes['li-attr']) ? $attributes['li-attr'] : '';
+        $prevPagesList = '<ul class="' . $ulCssClass . '" ' . $ulAttr .'>' . $this->prevButton($pageNumber) . $this->prevPages($pageNumber, $numPrevPages, $liCssClass, $liAttr);
+        $nextPageList = $this->nextPages($pageNumber, $numNextPages, $liCssClass, $liAttr) . $this->nextButton($pageNumber) . '</ul>';
         if ($pageNumber == 'index') {
             $listItems = $prevPagesList . $nextPageList;
         } else {
