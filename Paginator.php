@@ -13,12 +13,18 @@ class Paginator
     private $_itemLimitPerPage;
     private $_rowOffset = 0;
     private $_urlPattern = '/';
+    private $_urlParam = false;
+    private $_lastPage = null;
+    private $_paramName = 'page';
 
     /**
      * @return string url pattern
      */
     public function getUrlPattern()
     {
+        if ($this->_urlParam) {
+            return $this->_urlPattern . '?' . $this->_paramName . '=';
+        }
         return $this->_urlPattern;
     }
 
@@ -29,6 +35,15 @@ class Paginator
     {
         $this->_urlPattern = $urlPattern;
     }
+
+    /**
+     * @param string $paramName
+     */
+    public function setParamName($paramName)
+    {
+        $this->_paramName = $paramName;
+    }
+
 
     /**
      * @return int value of itemLimitPerPage
@@ -47,6 +62,22 @@ class Paginator
     }
 
     /**
+     * @return bool
+     */
+    public function isUrlParam()
+    {
+        return $this->_urlParam;
+    }
+
+    /**
+     * @param bool $urlParam
+     */
+    public function setUrlParam($urlParam)
+    {
+        $this->_urlParam = $urlParam;
+    }
+
+    /**
      * @return int value of rowOffset
      */
     public function getRowOffset()
@@ -61,7 +92,6 @@ class Paginator
     {
         $this->_rowOffset = $rowOffset;
     }
-
 
     /**
      * Paginator constructor.
@@ -114,6 +144,16 @@ class Paginator
         $this->_currentPageClass = $currentPageClass;
     }
 
+    /**
+     * @return mixed
+     */
+    private function getLastPage()
+    {
+        if ($this->_lastPage == null) {
+            $this->_lastPage = round(($this->getRowCount() / $this->getItemLimitPerPage()) - 1);
+        }
+        return $this->_lastPage;
+    }
 
     /**
      * Get the number of rows available
@@ -157,7 +197,7 @@ class Paginator
                 $stmt->execute();
                 return $stmt->rowCount();
             } elseif ($this->_table !== null) {
-                $stmt = $this->_db->prepare("SELECT * FROM $this->_table LIMIT " . $this->getRowOffset(). "," . $this->getItemLimitPerPage());
+                $stmt = $this->_db->prepare("SELECT * FROM $this->_table LIMIT " . $this->getRowOffset() . "," . $this->getItemLimitPerPage());
                 $stmt->execute();
                 return $stmt->rowCount();
             }
@@ -166,7 +206,7 @@ class Paginator
 
     /**
      * Get data to be used on the current page
-     * @param int $colId column id
+     * @param string $colId column id
      * @param array $params optional parameters for ['table' => 'tableName', 'sort' => 'ASC', 'columns' => 'colId, name, etc']
      * @return array columns from database
      * @throws Exception when table is not set or provided
@@ -180,23 +220,25 @@ class Paginator
         $sort = isset($params['sort']) ? $params['sort'] : 'DESC';
         if (isset($params['table'])) {
             $table = $params['table'];
-            $rowsLeft = $this->getRowsLeft($table);
+            $rowsLeft = $this->getRowsLeft($this->_table);
+            $limit = $this->_itemLimitPerPage;
             if ($rowsLeft < $this->_itemLimitPerPage) {
-                $this->_itemLimitPerPage = $rowsLeft;
+                $limit = $rowsLeft;
             }
             $select = "SELECT $columns FROM " . $table . " ORDER BY $colId $sort LIMIT ?,?";
             $prepare = $this->_db->prepare($select);
             $prepare->bindParam(1, $this->_rowOffset, PDO::PARAM_INT);
-            $prepare->bindParam(2, $this->_itemLimitPerPage, PDO::PARAM_INT);
+            $prepare->bindParam(2, $limit, PDO::PARAM_INT);
             $prepare->execute();
             $results = $prepare->fetchAll();
             return $results;
         } elseif ($this->_table !== null) {
             $rowsLeft = $this->getRowsLeft($this->_table);
+            $limit = $this->_itemLimitPerPage;
             if ($rowsLeft < $this->_itemLimitPerPage) {
-                $this->_itemLimitPerPage = $rowsLeft;
+                $limit = $rowsLeft;
             }
-            $prepare = $this->_db->prepare("SELECT * FROM $this->_table ORDER BY $colId $sort LIMIT " . $this->getRowOffset() . "," . $this->getItemLimitPerPage());
+            $prepare = $this->_db->prepare("SELECT * FROM $this->_table ORDER BY $colId $sort LIMIT " . $this->getRowOffset() . "," . $limit);
             $prepare->execute();
             $results = $prepare->fetchAll();
             return $results;
@@ -217,14 +259,24 @@ class Paginator
         while ($numPrevPages >= 1) {
             $pageNumber -= 1;
             if ($pageNumber >= 1) {
-                $page = $pageNumber . '.php';
-                if (file_exists("$page")) {
-                    $listItems = '<li class="' . $cssClass . '" ' . $attr . '><a href="' . $this->getUrlPattern() . $pageNumber . '.php">' . $pageNumber . '</a></li>' . $listItems;
-                }
+                $listItems = $this->createListItem($cssClass, $attr, $pageNumber) . $listItems;
             }
             $numPrevPages -= 1;
         }
         return $listItems;
+    }
+
+    function createListItem($cssClass, $attr, $pageNumber)
+    {
+        $lastPage = $this->getLastPage();
+        if ($this->_urlParam && $pageNumber <= $lastPage && $lastPage > 0) {
+            return '<li class="' . $cssClass . '" ' . $attr . '><a href="' . $this->getUrlPattern() . $pageNumber . '">' . $pageNumber . '</a></li>';
+        } elseif (!$this->_urlParam) {
+            $page = $pageNumber . '.php';
+            if (file_exists($page)) {
+                return '<li class="' . $cssClass . '" ' . $attr . '><a href="' . $this->getUrlPattern() . $pageNumber . '.php">' . $pageNumber . '</a></li>';
+            }
+        }
     }
 
     /**
@@ -241,10 +293,7 @@ class Paginator
         $count = 1;
         while ($count <= $numNextPages) {
             $pageNumber += 1;
-            $page = $pageNumber . '.php';
-            if (file_exists("$page")) {
-                $listItems .= '<li class="' . $cssClass . '" ' . $attr . '><a href="' . $this->getUrlPattern() . $pageNumber . '.php">' . $pageNumber . '</a></li>';
-            }
+            $listItems .= $this->createListItem($cssClass, $attr, $pageNumber);
             $count += 1;
         }
         return $listItems;
@@ -264,7 +313,7 @@ class Paginator
         $ulAttr = isset($attributes['ul-attr']) ? $attributes['ul-attr'] : '';
         $liCssClass = isset($attributes['li-class']) ? $attributes['li-class'] : '';
         $liAttr = isset($attributes['li-attr']) ? $attributes['li-attr'] : '';
-        $prevPagesList = '<ul class="' . $ulCssClass . '" ' . $ulAttr .'>' . $this->prevButton($pageNumber) . $this->prevPages($pageNumber, $numPrevPages, $liCssClass, $liAttr);
+        $prevPagesList = '<ul class="' . $ulCssClass . '" ' . $ulAttr . '>' . $this->prevButton($pageNumber) . $this->prevPages($pageNumber, $numPrevPages, $liCssClass, $liAttr);
         $nextPageList = $this->nextPages($pageNumber, $numNextPages, $liCssClass, $liAttr) . $this->nextButton($pageNumber) . '</ul>';
         if ($pageNumber == 'index') {
             $listItems = $prevPagesList . $nextPageList;
@@ -282,12 +331,16 @@ class Paginator
     function prevButton($pageNumber)
     {
         $prev = '';
-        if ($pageNumber == 1) {
-            $prev = '<li><a href="index.php">&laquo; Previous</a></li>';
-        } elseif ($pageNumber > 1) {
-            $prev = '<li><a href="' . $this->getUrlPattern() . ($pageNumber - 1) . '.php' . '">&laquo; Previous</a></li>';
+        if ($this->_urlParam && $pageNumber >= 1) {
+            return '<li><a href="' . $this->getUrlPattern() . ($pageNumber - 1) . '">&laquo; Previous</a></li>';
+        } elseif (!$this->_urlParam) {
+            if ($pageNumber == 1) {
+                $prev = '<li><a href="index.php">&laquo; Previous</a></li>';
+            } elseif ($pageNumber > 1) {
+                $prev = '<li><a href="' . $this->getUrlPattern() . ($pageNumber - 1) . '.php' . '">&laquo; Previous</a></li>';
+            }
+            return $prev;
         }
-        return $prev;
     }
 
     /**
@@ -297,13 +350,17 @@ class Paginator
      */
     function nextButton($pageNumber)
     {
-        if ($pageNumber == 'index') {
-            $page = '1.php';
-        } else {
-            $page = ($pageNumber + 1) . '.php';
-        }
-        if (file_exists($page)) {
-            return '<li><a href="' . $this->getUrlPattern() . ($pageNumber + 1) . '.php">Next &raquo; </a></li>';
+        if ($this->_urlParam && $pageNumber < $this->getLastPage()) {
+            return '<li><a href="' . $this->getUrlPattern() . ($pageNumber + 1) . '">Next &raquo; </a></li>';
+        } elseif (!$this->_urlParam) {
+            if ($pageNumber == 'index') {
+                $page = '1.php';
+            } else {
+                $page = ($pageNumber + 1) . '.php';
+            }
+            if (file_exists($page)) {
+                return '<li><a href="' . $this->getUrlPattern() . ($pageNumber + 1) . '.php">Next &raquo; </a></li>';
+            }
         }
         return '';
     }
@@ -314,6 +371,9 @@ class Paginator
      */
     function getPageNumber()
     {
+        if ($this->_urlParam && isset($_GET[$this->_paramName]) && $_GET[$this->_paramName] != 0) {
+            return $_GET[$this->_paramName];
+        }
         $currentPage = basename($_SERVER['SCRIPT_FILENAME']);
         $pageNumber = rtrim($currentPage, '.php');
         return $pageNumber;
@@ -325,6 +385,9 @@ class Paginator
      */
     function getCurrentPage()
     {
+        if ($this->_urlParam && isset($_GET[$this->_paramName]) && $_GET[$this->_paramName] != 0) {
+            return $_GET[$this->_paramName];
+        }
         $currentPage = basename($_SERVER['SCRIPT_FILENAME']);
         return $currentPage;
     }
@@ -334,14 +397,13 @@ class Paginator
      */
     function createPages()
     {
-        $last_page = ($this->getRowCount() / $this->getItemLimitPerPage()) - 1;
-        if (!is_int($last_page)) {
-            $last_page = (int)$last_page + 1;
-        }
-        for ($counter = 1; $counter <= $last_page; $counter++) {
-            $page = $counter . '.php';
-            if (!file_exists($page)) {
-                copy('index.php', $page);
+        if (!$this->_urlParam) {
+            $lastPage = $this->getLastPage();
+            for ($counter = 1; $counter <= $lastPage; $counter++) {
+                $page = $counter . '.php';
+                if (!file_exists($page)) {
+                    copy('index.php', $page);
+                }
             }
         }
     }
